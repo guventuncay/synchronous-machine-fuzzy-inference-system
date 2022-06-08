@@ -1,0 +1,76 @@
+FUNCTION_BLOCK sync_mach
+
+VAR_INPUT
+    I_y : REAL;
+    PF : REAL;
+    e_PF : REAL;
+    d_if : REAL;
+END_VAR
+
+VAR_OUTPUT
+    I_f : REAL;
+END_VAR
+
+FUZZIFY I_y
+    TERM low := (3,1)(4,0);
+    TERM med := (3,0)(4,1)(5,0);
+    TERM high := (4,0)(5,1)(6,0);
+    TERM veryHigh := (5,0)(6,1);
+END_FUZZIFY
+
+FUZZIFY PF
+    TERM low := gauss 0.6 0.04;
+    TERM med := gauss 0.75 0.06;
+    TERM high := gauss 0.9 0.08;
+END_FUZZIFY
+
+FUZZIFY e_PF
+    TERM low := sigm -300 0.1;
+    TERM high := gbell 0.2 2 0.3;
+END_FUZZIFY
+
+FUZZIFY d_if
+    TERM low := sigm -200 0.3;
+    TERM high := gauss 0.5 0.08;
+END_FUZZIFY
+
+DEFUZZIFY I_f
+    TERM poor := gbell 0.2 2 1.1;
+    TERM good := gbell 0.2 2 1.4;
+    TERM excellent := sigm 10 1.5;
+    METHOD : COG;
+    DEFAULT := 1.3;
+END_DEFUZZIFY
+
+RULEBLOCK rule_block_1
+    AND : MIN;
+    ACT : MIN;
+    ACCU : MAX;
+
+    RULE 1: IF I_y IS high AND PF IS high AND e_PF IS high AND d_if IS high THEN I_f IS excellent;
+    RULE 2: IF I_y IS high AND PF IS high AND e_PF IS high AND d_if IS low THEN I_f IS good;
+    RULE 3: IF I_y IS high AND PF IS high AND e_PF IS low AND d_if IS high THEN I_f IS good;
+    RULE 4: IF I_y IS high AND PF IS high AND e_PF IS low AND d_if IS low THEN I_f IS good;
+    RULE 5: IF I_y IS high AND PF IS low AND e_PF IS high AND d_if IS high THEN I_f IS excellent;
+    RULE 6: IF I_y IS high AND PF IS med AND e_PF IS high AND d_if IS high THEN I_f IS excellent;
+    RULE 7: IF I_y IS low AND PF IS high AND e_PF IS high AND d_if IS low THEN I_f IS good;
+    RULE 8: IF I_y IS low AND PF IS high AND e_PF IS low AND d_if IS low THEN I_f IS good;
+    RULE 9: IF I_y IS low AND PF IS med AND e_PF IS high AND d_if IS high THEN I_f IS excellent;
+    RULE 10: IF I_y IS low AND PF IS med AND e_PF IS high AND d_if IS low THEN I_f IS good;
+    RULE 11: IF I_y IS med AND PF IS high AND e_PF IS high AND d_if IS high THEN I_f IS excellent;
+    RULE 12: IF I_y IS med AND PF IS high AND e_PF IS high AND d_if IS low THEN I_f IS good;
+    RULE 12: IF I_y IS med AND PF IS high AND e_PF IS low AND d_if IS low THEN I_f IS good;
+    RULE 13: IF I_y IS med AND PF IS med AND e_PF IS high AND d_if IS high THEN I_f IS excellent;
+    RULE 14: IF I_y IS med AND PF IS med AND e_PF IS high AND d_if IS high THEN I_f IS good;
+    RULE 15: IF I_y IS med AND PF IS med AND e_PF IS high AND d_if IS low THEN I_f IS good;
+    RULE 16: IF I_y IS veryHigh AND PF IS high AND e_PF IS high AND d_if IS high THEN I_f IS excellent;
+    RULE 17: IF I_y IS veryHigh AND PF IS high AND e_PF IS high AND d_if IS high THEN I_f IS good;
+    RULE 18: IF I_y IS veryHigh AND PF IS high AND e_PF IS high AND d_if IS low THEN I_f IS good;
+    RULE 19: IF I_y IS veryHigh AND PF IS high AND e_PF IS low AND d_if IS high THEN I_f IS excellent;
+    RULE 20: IF I_y IS veryHigh AND PF IS high AND e_PF IS low AND d_if IS low THEN I_f IS good;
+    RULE 21: IF I_y IS veryHigh AND PF IS low AND e_PF IS high AND d_if IS high THEN I_f IS excellent;
+    RULE 22: IF I_y IS veryHigh AND PF IS med AND e_PF IS high AND d_if IS high THEN I_f IS excellent;
+
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK
